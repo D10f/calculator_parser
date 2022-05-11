@@ -165,8 +165,8 @@ describe('Binary expressions test suite', () => {
     });
   });
 
-  test('Should subtract & multiply several numbers together, preserving math operator precedence', () => {
-    const program = '2*6-4;';
+  test('Should subtract & divide several numbers together, preserving math operator precedence', () => {
+    const program = '2/6-4;';
     const ast = parser.parse(program);
 
     expect(ast).toEqual({
@@ -179,7 +179,7 @@ describe('Binary expressions test suite', () => {
             operator: '-',
             left: {
               type: 'BinaryExpression',
-              operator: '*',
+              operator: '/',
               left: {
                 type: 'NumericLiteral',
                 value: '2',
