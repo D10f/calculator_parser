@@ -1,22 +1,18 @@
-export enum TOKEN_TYPE {
-  STRING = 'STRING',
-  NUMBER = 'NUMBER',
-}
+export type TokenType = 'STRING' | 'NUMBER' | 'SKIP';
 
-export type TokenType = TOKEN_TYPE;
-export type TokenValue = string | number;
-
-export type NumericLiteralToken = {
+export type NumericLiteral = {
   type: 'NumericLiteral';
   value: number;
 };
 
-export type StringLiteralToken = {
+export type StringLiteral = {
   type: 'StringLiteral';
   value: string;
 };
 
 export type Token = {
   type: TokenType;
-  value: TokenValue;
+  value: string | number;
 };
+
+export type TokenizerSpec = [RegExp, TokenType][];

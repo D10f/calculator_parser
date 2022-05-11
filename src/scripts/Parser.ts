@@ -1,30 +1,22 @@
 import { Tokenizer } from './Tokenizer';
-import {
-  Token,
-  TOKEN_TYPE,
-  StringLiteralToken,
-  NumericLiteralToken,
-} from './types';
+import { Token, TokenType, StringLiteral, NumericLiteral } from './types';
 
 /**
  * Letter parser: recursive descent implementation
  */
 export class Parser {
-  constructor(
-    private str: string = '',
-    private lookahead: Token | null = null,
-    private tokenizer: Tokenizer = new Tokenizer(),
-  ) {}
+  private tokenizer: Tokenizer | null = null;
+  private lookahead: Token | null = null;
 
   /**
    * Parses a string into an AST
    */
   parse(str: string) {
-    this.str = str;
-    this.tokenizer.init(str);
-
+    if (str.length === 0) {
+      throw new Error('Please provide a string with length greater than 0');
+    }
+    this.tokenizer = new Tokenizer(str);
     this.lookahead = this.tokenizer.getNextToken();
-
     return this.Program();
   }
 
@@ -35,7 +27,7 @@ export class Parser {
    *  : NumericLiteral
    *  ;
    */
-  Program() {
+  private Program() {
     return {
       type: 'Program',
       body: this.Literal(),
@@ -48,14 +40,13 @@ export class Parser {
    *  | StringLiteral
    *  ;
    */
-  Literal() {
+  private Literal() {
     switch (this.lookahead?.type) {
-      case TOKEN_TYPE.NUMBER:
+      case 'NUMBER':
         return this.NumericLiteral();
-      case TOKEN_TYPE.STRING:
+      case 'STRING':
         return this.StringLiteral();
     }
-
     throw new SyntaxError(`Literal: unexpected literal production`);
   }
 
@@ -64,8 +55,8 @@ export class Parser {
    *  : String
    *  ;
    */
-  StringLiteral(): StringLiteralToken {
-    const token = this.eat(TOKEN_TYPE.STRING);
+  private StringLiteral(): StringLiteral {
+    const token = this.eat('STRING');
 
     return {
       type: 'StringLiteral',
@@ -78,8 +69,8 @@ export class Parser {
    *  : Number
    *  ;
    */
-  NumericLiteral(): NumericLiteralToken {
-    const token = this.eat(TOKEN_TYPE.NUMBER);
+  private NumericLiteral(): NumericLiteral {
+    const token = this.eat('NUMBER');
 
     return {
       type: 'NumericLiteral',
@@ -89,9 +80,8 @@ export class Parser {
 
   /**
    * Expects a token of a given type
-   *
    */
-  eat(tokenType: TOKEN_TYPE): Token {
+  private eat(tokenType: TokenType): Token {
     const token = this.lookahead;
 
     if (token === null) {
@@ -106,7 +96,7 @@ export class Parser {
       );
     }
 
-    this.lookahead = this.tokenizer.getNextToken();
+    this.lookahead = this.tokenizer!.getNextToken();
 
     return token;
   }

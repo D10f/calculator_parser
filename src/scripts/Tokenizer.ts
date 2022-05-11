@@ -1,5 +1,24 @@
-import { isNumber } from './utils';
-import { TOKEN_TYPE, Token } from './types';
+import { Token, TokenizerSpec } from './types';
+
+const Spec: TokenizerSpec = [
+  // numbers
+  [/^\d+/, 'NUMBER'],
+
+  // double quotes
+  [/^"[^"]*"/, 'STRING'],
+
+  // single quotes
+  [/^'[^']*'/, 'STRING'],
+
+  // whitespaces
+  [/^\s+/, 'SKIP'],
+
+  // single-line comments
+  [/^\/\/.*/, 'SKIP'],
+
+  // multi-line comments
+  [/^\/\*[\s\S]*\*\//, 'SKIP'],
+];
 
 /**
  * Lazily pulls a token from a stream
@@ -7,22 +26,23 @@ import { TOKEN_TYPE, Token } from './types';
 export class Tokenizer {
   constructor(private str: string = '', private cursor: number = 0) {}
 
-  init(str: string) {
-    this.str = str;
-  }
-
   /**
    * Whether there are tokens left in the string
    */
-  hasMoreTokens() {
+  private hasMoreTokens() {
     return this.cursor < this.str.length;
   }
 
   /**
-   * Whether the tokenizer has reached the end of the file
+   * Matches a token against a regular expression
    */
-  isEOF() {
-    return this.cursor === this.str.length;
+  private match(regexp: RegExp, str: string) {
+    const match = regexp.exec(str);
+    if (match === null) {
+      return null;
+    }
+    this.cursor += match[0].length;
+    return match[0];
   }
 
   /**
@@ -35,41 +55,22 @@ export class Tokenizer {
 
     const string = this.str.slice(this.cursor);
 
-    // Numbers
-    if (isNumber(string[0])) {
-      let value = '';
+    for (const [regexp, type] of Spec) {
+      const value = this.match(regexp, string);
 
-      while (isNumber(string[this.cursor])) {
-        value += string[this.cursor++];
+      // no match for current rule, move on to next one
+      if (value === null) {
+        continue;
       }
 
-      return {
-        type: TOKEN_TYPE.NUMBER,
-        value,
-      };
-    }
-
-    // Strings
-    if (string[0] === '"' || string[0] === "'") {
-      // initialize at the opening double quote
-      let value = string[this.cursor++];
-
-      while (
-        (string[this.cursor] !== '"' || string[this.cursor] !== "'") &&
-        !this.isEOF()
-      ) {
-        value += string[this.cursor++];
+      // rule should be ignored eg. whitespaces
+      if (type === 'SKIP') {
+        return this.getNextToken();
       }
 
-      // consume the closing double quote
-      value += string[this.cursor];
-
-      return {
-        type: TOKEN_TYPE.STRING,
-        value,
-      };
+      return { type, value };
     }
 
-    return null;
+    throw new SyntaxError(`Unexpected token: "${string[0]}"`);
   }
 }
