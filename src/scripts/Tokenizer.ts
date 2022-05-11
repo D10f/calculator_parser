@@ -18,6 +18,9 @@ const Spec: TokenizerSpec = [
 
   // multi-line comments
   [/^\/\*[\s\S]*\*\//, 'SKIP'],
+
+  // expression delimiters
+  [/^;/, ';'],
 ];
 
 /**

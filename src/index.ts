@@ -7,22 +7,13 @@ import './main.css';
 
 const parser = new Parser();
 
-function exec() {
-  const program = `
-  /**
-   * Docstring
-   */
-   "42"
+const program = `
+/**
+ * Docstring
+ */
+ "42";"hello";'world';
 `;
 
-  const ast = parser.parse(program);
+const ast = parser.parse(program);
 
-  console.log(JSON.stringify(ast, null, 2));
-}
-
-// const test: TestFunction = (program, expected) => {
-//   const ast = parser.parse(program);
-//   assert.deepEqual(ast, expected);
-// };
-
-// [literalTest].forEach((testSuite) => testSuite(test));
+console.log(JSON.stringify(ast, null, 2));

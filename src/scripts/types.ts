@@ -1,4 +1,4 @@
-export type TokenType = 'STRING' | 'NUMBER' | 'SKIP';
+export type TokenType = 'STRING' | 'NUMBER' | 'SKIP' | ';';
 
 export type NumericLiteral = {
   type: 'NumericLiteral';
