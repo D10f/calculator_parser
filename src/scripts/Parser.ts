@@ -1,5 +1,12 @@
 import { Tokenizer } from './Tokenizer';
-import { Token, TokenType, StringLiteral, NumericLiteral } from './types';
+import {
+  Token,
+  TokenType,
+  StringLiteral,
+  NumericLiteral,
+  BinaryExpression,
+  MathOperator,
+} from './types';
 
 /**
  * Letter parser: recursive descent implementation
@@ -80,6 +87,62 @@ export class Parser {
    *  ;
    */
   private Expression() {
+    return this.AdditiveExpression();
+  }
+
+  /**
+   * AdditiveExpression
+   *  : Literal
+   *  | AdditiveExpression ADDITIVE_OPERATOR Literal
+   */
+  private AdditiveExpression() {
+    let left = this.MultiplicativeExpression() as BinaryExpression;
+
+    while (this.lookahead?.type === 'ADDITIVE_OPERATOR') {
+      const operator = this.eat('ADDITIVE_OPERATOR').value as MathOperator;
+      const right = this.MultiplicativeExpression() as BinaryExpression;
+
+      left = {
+        type: 'BinaryExpression',
+        operator,
+        left,
+        right,
+      };
+    }
+
+    return left;
+  }
+
+  /**
+   * MultiplicativeExpression
+   *  : Literal
+   *  | PrimaryExpression MULTIPLICATIVE_OPERATOR PrimaryExpression
+   */
+  private MultiplicativeExpression() {
+    let left = this.PrimaryExpression() as BinaryExpression;
+
+    while (this.lookahead?.type === 'MULTIPLICATIVE_OPERATOR') {
+      const operator = this.eat('MULTIPLICATIVE_OPERATOR')
+        .value as MathOperator;
+      const right = this.PrimaryExpression() as BinaryExpression;
+
+      left = {
+        type: 'BinaryExpression',
+        operator,
+        left,
+        right,
+      };
+    }
+
+    return left;
+  }
+
+  /**
+   * PrimaryExpression
+   *  : Literal
+   *  ;
+   */
+  private PrimaryExpression() {
     return this.Literal();
   }
 

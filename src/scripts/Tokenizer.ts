@@ -21,6 +21,10 @@ const Spec: TokenizerSpec = [
 
   // expression delimiters
   [/^;/, ';'],
+
+  // math operators
+  [/^[+\-]/, 'ADDITIVE_OPERATOR'],
+  [/^\*/, 'MULTIPLICATIVE_OPERATOR'],
 ];
 
 /**
