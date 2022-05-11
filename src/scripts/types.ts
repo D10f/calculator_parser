@@ -3,6 +3,8 @@ export type TokenType =
   | 'NUMBER'
   | 'SKIP'
   | ';'
+  | '('
+  | ')'
   | 'ADDITIVE_OPERATOR'
   | 'MULTIPLICATIVE_OPERATOR';
 

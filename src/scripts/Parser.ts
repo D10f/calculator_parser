@@ -140,10 +140,28 @@ export class Parser {
   /**
    * PrimaryExpression
    *  : Literal
+   *  | ParenthesizedExpression
    *  ;
    */
   private PrimaryExpression() {
-    return this.Literal();
+    switch (this.lookahead?.type) {
+      case '(':
+        return this.ParenthesizedExpression();
+      default:
+        return this.Literal();
+    }
+  }
+
+  /**
+   * ParenthesizedExpression
+   *  : '(' Expression ')'
+   *  ;
+   */
+  private ParenthesizedExpression() {
+    this.eat('(');
+    const expression = this.Expression();
+    this.eat(')');
+    return expression;
   }
 
   /**
