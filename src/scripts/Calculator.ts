@@ -4,13 +4,15 @@ import { Parser } from './Parser';
 export class Calculator {
   private calculator: HTMLElement;
   private output: HTMLOutputElement;
+  private errorMsg: HTMLParagraphElement;
   private parser: Parser;
 
   constructor(selector: string) {
     this.calculator = document.querySelector(selector) as HTMLElement;
     this.output = this.calculator.querySelector('output') as HTMLOutputElement;
+    this.errorMsg = this.calculator.querySelector('p') as HTMLParagraphElement;
     this.parser = new Parser();
-    this.clear();
+    // this.clearOutput();
     this.listen();
   }
 
@@ -19,10 +21,14 @@ export class Calculator {
     document.addEventListener('keydown', this.handleInput.bind(this));
   }
 
-  clear() {
+  clearOutput() {
     // TODO: Handle mysterious call to clear after calculating output
     console.log(`I'm being a jerk :)`);
     this.output.textContent = '';
+  }
+
+  clearError() {
+    this.errorMsg.textContent = '';
   }
 
   backspace() {
@@ -44,9 +50,17 @@ export class Calculator {
       this.output.textContent! + ';',
     );
 
-    const ast = this.parser.parse(input);
-    const result = String(mathInterpreter(ast));
-    this.output.textContent = result;
+    if (input === ';' || !input) {
+      return;
+    }
+
+    try {
+      const ast = this.parser.parse(input);
+      const result = String(mathInterpreter(ast));
+      this.output.textContent = result;
+    } catch (error) {
+      this.errorMsg.textContent = 'Malformed Expression';
+    }
   }
 
   handleExponentialOperator(input: string) {
@@ -66,10 +80,12 @@ export class Calculator {
       return;
     }
 
+    this.clearError();
+
     let key: string = target.textContent as string;
 
     if (key === 'C') {
-      return this.clear();
+      return this.clearOutput();
     }
 
     if (key === '=') {
@@ -80,6 +96,8 @@ export class Calculator {
   }
 
   handleInput({ key }: KeyboardEvent) {
+    this.clearError();
+
     if (key.match(/^[\d+\-\/%√\(\)\.\^]/)) {
       return this.enterInput(key);
     }
@@ -88,12 +106,16 @@ export class Calculator {
       return this.enterInput('×');
     }
 
-    if (key.match(/^[Enter|=]/)) {
+    if (key === 'Enter' || key === '=') {
       return this.calculateOutput();
     }
 
     if (key === 'Backspace') {
-      this.backspace();
+      return this.backspace();
+    }
+
+    if (key === 'Escape') {
+      return this.clearOutput();
     }
   }
 }
