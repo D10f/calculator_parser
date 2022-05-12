@@ -1,80 +1,56 @@
-enum Operation {
-  ADD,
-  SUBTRACT,
-  MULTIPLY,
-  DIVIDE,
-  ROOT,
-  MODULO,
-  IDLE,
-}
-
-/**
- * @example valid: 3.2 * (15 - 4.13)
- * @example valid: -32 - 42
- * @example valid: 2 + 2 - (3.14 * -27) + 0.32
- * @example invalid: -(32 - 42)
- * @example invalid: 3.14 + .2
- */
-const calcRegexp =
-  // /^-?(?=\d)(\(?\d+(\.\d*)?\)?)([\+\-\*\\](\(?-?(?=\d)\d+(\.\d*)?\)?))+/;
-  // /^-?(?=\d)(\(?\d+(\.\d*)?\)?)(([\+\-\*\/](\(?-?(?=\d)\d+(\.\d*)?\)?))+)?/;
-  /^-?(?=\d)(\(?\d+(\.\d*)?\)?)(([*+/\-](\(?-?(?=\d)\d+(\.\d*)?\)?))+)?/;
+import { compileMathOperation } from '../index';
+import { Parser } from './Parser';
 
 export class Calculator {
-  private operation: Operation;
-  private input: string;
-  private history: string;
-  private validInput: RegExp;
   private calculator: HTMLElement;
-  private inputDOM: HTMLElement;
+  private output: HTMLOutputElement;
+  private parser: Parser;
 
-  constructor(private calculatorDOM: string) {
-    this.operation = Operation.IDLE;
-    this.input = '0';
-    this.history = '';
-    this.validInput = new RegExp(calcRegexp);
-    this.calculator = document.querySelector(calculatorDOM) as HTMLElement;
-    this.inputDOM = this.calculator.querySelector('section div') as HTMLElement;
-    this.reset();
+  constructor(selector: string) {
+    this.calculator = document.querySelector(selector) as HTMLElement;
+    this.output = this.calculator.querySelector('output') as HTMLOutputElement;
+    this.parser = new Parser();
+    this.clear();
     this.listen();
   }
 
   listen() {
     this.calculator.addEventListener('click', this.handleClick.bind(this));
-    // this.calculator.addEventListener('input', this.handleInput);
+    document.addEventListener('keydown', this.handleInput.bind(this));
   }
 
-  reset() {
-    this.operation = Operation.IDLE;
-    this.input = '0';
-    this.history = '';
-    this.updateScreen(this.input);
+  clear() {
+    console.log(`I'm being a jerk :)`);
+    this.output.textContent = '';
   }
 
-  setOperation(operation: Operation) {
-    this.operation = operation;
+  backspace() {
+    this.output.textContent = this.output.textContent!.slice(0, -1);
   }
 
-  validateInput(newInput: string) {
-    return this.validInput.test(newInput);
-  }
-
-  calculateOutput() {
-    const operands = this.input.split('');
-  }
-
-  updateScreen(char: string) {
-    const newInput = this.input.startsWith('0') ? char : (this.input += char);
-    const isValid = this.validateInput(newInput);
-
-    if (isValid) {
-      this.input = newInput;
-      this.inputDOM.textContent = this.input;
+  enterInput(char: string) {
+    if (this.output.textContent === '0') {
+      this.output.textContent = char;
+    } else {
+      this.output.textContent += char;
     }
   }
 
+  calculateOutput() {
+    let input = this.output.textContent! + ';';
+
+    // TODO: update parser to handle negative numbers
+    if (input.startsWith('-')) {
+      input = '0' + input;
+    }
+
+    const ast = this.parser.parse(input);
+    const result = String(compileMathOperation(ast));
+    this.output.textContent = result;
+  }
+
   handleClick(event: MouseEvent) {
-    const target = event.target as HTMLElement;
+    const target = event.target as HTMLButtonElement;
 
     if (target.tagName !== 'BUTTON') {
       return;
@@ -82,30 +58,32 @@ export class Calculator {
 
     let key: string = target.textContent as string;
 
-    switch (key.charCodeAt(0)) {
-      case 43: // +
-        this.setOperation(Operation.ADD);
-        break;
-      case 45: // -
-        this.setOperation(Operation.SUBTRACT);
-        break;
-      case 215: // x or &times;
-        this.setOperation(Operation.MULTIPLY);
-        key = '*';
-        break;
-      case 47: // /
-        this.setOperation(Operation.DIVIDE);
-        break;
-      case 37: // %
-        this.setOperation(Operation.MODULO);
-        break;
-      case 61: // =
-        return this.calculateOutput();
-      case 67: // C
-        this.reset();
-        break;
+    if (key === 'C') {
+      return this.clear();
     }
 
-    this.updateScreen(key);
+    if (key === '=') {
+      return this.calculateOutput();
+    }
+
+    this.enterInput(key);
+  }
+
+  handleInput({ key }: KeyboardEvent) {
+    if (key.match(/^[\d+\-\/%√\(\)\.]/)) {
+      return this.enterInput(key);
+    }
+
+    if (key.match(/^[x\*]/)) {
+      return this.enterInput('×');
+    }
+
+    if (key.match(/^[Enter|=]/)) {
+      return this.calculateOutput();
+    }
+
+    if (key === 'Backspace') {
+      this.backspace();
+    }
   }
 }
