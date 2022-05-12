@@ -232,4 +232,64 @@ describe('Binary expressions test suite', () => {
       ],
     });
   });
+
+  test('Should calculate exponents', () => {
+    const program = '(2 + 2) ^ 3;';
+    const ast = parser.parse(program);
+
+    expect(ast).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'ExpressionStatement',
+          expression: {
+            type: 'BinaryExpression',
+            operator: '^',
+            left: {
+              type: 'BinaryExpression',
+              operator: '+',
+              left: {
+                type: 'NumericLiteral',
+                value: '2',
+              },
+              right: {
+                type: 'NumericLiteral',
+                value: '2',
+              },
+            },
+            right: {
+              type: 'NumericLiteral',
+              value: '3',
+            },
+          },
+        },
+      ],
+    });
+  });
+
+  test('Should calculate modulo/remaining', () => {
+    const program = '2 % 3;';
+    const ast = parser.parse(program);
+
+    expect(ast).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'ExpressionStatement',
+          expression: {
+            type: 'BinaryExpression',
+            operator: '%',
+            left: {
+              type: 'NumericLiteral',
+              value: '2',
+            },
+            right: {
+              type: 'NumericLiteral',
+              value: '3',
+            },
+          },
+        },
+      ],
+    });
+  });
 });
