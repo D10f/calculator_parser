@@ -20,6 +20,7 @@ export class Calculator {
   }
 
   clear() {
+    // TODO: Handle mysterious call to clear after calculating output
     console.log(`I'm being a jerk :)`);
     this.output.textContent = '';
   }
@@ -32,21 +33,30 @@ export class Calculator {
     if (this.output.textContent === '0') {
       this.output.textContent = char;
     } else {
-      this.output.textContent += char;
+      this.output.textContent = this.handleExponentialOperator(
+        this.output.textContent + char,
+      );
     }
   }
 
   calculateOutput() {
-    let input = this.output.textContent! + ';';
-
-    // TODO: update parser to handle negative numbers
-    if (input.startsWith('-')) {
-      input = '0' + input;
-    }
+    let input = this.handleUnsupportedNegativeIntegers(
+      this.output.textContent! + ';',
+    );
 
     const ast = this.parser.parse(input);
     const result = String(mathInterpreter(ast));
     this.output.textContent = result;
+  }
+
+  handleExponentialOperator(input: string) {
+    // TODO: update parser to handle double multiplicative symbols
+    return input.replace('××', '^');
+  }
+
+  handleUnsupportedNegativeIntegers(input: string) {
+    // TODO: update parser to handle negative numbers
+    return input.startsWith('-') ? `0${input}` : input;
   }
 
   handleClick(event: MouseEvent) {
@@ -70,7 +80,7 @@ export class Calculator {
   }
 
   handleInput({ key }: KeyboardEvent) {
-    if (key.match(/^[\d+\-\/%√\(\)\.]/)) {
+    if (key.match(/^[\d+\-\/%√\(\)\.\^]/)) {
       return this.enterInput(key);
     }
 
