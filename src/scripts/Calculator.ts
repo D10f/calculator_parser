@@ -1,4 +1,4 @@
-import { compileMathOperation } from '../index';
+import { mathInterpreter } from './mathInterpreter';
 import { Parser } from './Parser';
 
 export class Calculator {
@@ -45,7 +45,7 @@ export class Calculator {
     }
 
     const ast = this.parser.parse(input);
-    const result = String(compileMathOperation(ast));
+    const result = String(mathInterpreter(ast));
     this.output.textContent = result;
   }
 
