@@ -1,12 +1,4 @@
 import { Tokenizer } from './Tokenizer';
-import {
-  Token,
-  TokenType,
-  StringLiteral,
-  NumericLiteral,
-  BinaryExpression,
-  MathOperator,
-} from './types';
 
 /**
  * Letter parser: recursive descent implementation

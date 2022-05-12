@@ -1,5 +1,3 @@
-import { Token, TokenizerSpec } from './types';
-
 const Spec: TokenizerSpec = [
   // numbers
   [/^\d+/, 'NUMBER'],

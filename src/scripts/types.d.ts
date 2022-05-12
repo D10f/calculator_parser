@@ -1,4 +1,4 @@
-export type TokenType =
+type TokenType =
   | 'STRING'
   | 'NUMBER'
   | 'SKIP'
@@ -8,21 +8,21 @@ export type TokenType =
   | 'ADDITIVE_OPERATOR'
   | 'MULTIPLICATIVE_OPERATOR';
 
-export type NumericLiteral = {
+type NumericLiteral = {
   type: 'NumericLiteral';
   value: number;
 };
 
-export type StringLiteral = {
+type StringLiteral = {
   type: 'StringLiteral';
   value: string;
 };
 
-export type AdditiveOperator = '+' | '-';
-export type MultiplicativeOperator = '*';
-export type MathOperator = AdditiveOperator | MultiplicativeOperator;
+type AdditiveOperator = '+' | '-';
+type MultiplicativeOperator = '*';
+type MathOperator = AdditiveOperator | MultiplicativeOperator;
 
-export type BinaryExpression =
+type BinaryExpression =
   | NumericLiteral
   | {
       type: 'BinaryExpression';
@@ -31,9 +31,9 @@ export type BinaryExpression =
       right: BinaryExpression;
     };
 
-export type Token = {
+type Token = {
   type: TokenType;
   value: string | number;
 };
 
-export type TokenizerSpec = [RegExp, TokenType][];
+type TokenizerSpec = [RegExp, TokenType][];
